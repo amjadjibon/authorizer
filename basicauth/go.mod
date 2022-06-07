@@ -1,4 +1,4 @@
-module github.com/amjadjibon/authorizer/basiauth
+module github.com/amjadjibon/authorizer/basicauth
 
 go 1.17
 
