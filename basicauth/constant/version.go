@@ -1,4 +1,4 @@
 package constant
 
 // Version constant of the authorizer
-const Version = "0.0.3"
+const Version = "0.0.4"
