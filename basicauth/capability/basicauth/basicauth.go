@@ -9,7 +9,7 @@ import (
 	"github.com/mkawserm/abesh/iface"
 	"github.com/mkawserm/abesh/model"
 
-	"gitlab.upay.dev/golang/basicauth/constant"
+	"github.com/amjadjibon/authorizer/basiauth/constant"
 )
 
 type BasicAuth struct {

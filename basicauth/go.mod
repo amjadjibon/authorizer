@@ -1,4 +1,4 @@
-module gitlab.upay.dev/golang/basicauth
+module github.com/amjadjibon/authorizer/basiauth
 
 go 1.17
 
