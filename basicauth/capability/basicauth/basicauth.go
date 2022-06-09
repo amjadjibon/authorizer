@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"github.com/mkawserm/abesh/iface"
+	"github.com/mkawserm/abesh/logger"
 	"github.com/mkawserm/abesh/model"
+	"github.com/mkawserm/abesh/registry"
 
 	"github.com/amjadjibon/authorizer/basicauth/constant"
 )
@@ -16,22 +18,6 @@ type BasicAuth struct {
 	mCM       model.ConfigMap
 	mUsername string
 	mPassword string
-}
-
-func (b *BasicAuth) GetConfigMap() model.ConfigMap {
-	return b.mCM
-}
-
-func (b *BasicAuth) SetConfigMap(cm model.ConfigMap) error {
-	b.mCM = cm
-	b.mUsername = cm.String("username", "")
-	b.mPassword = cm.String("password", "")
-
-	if len(b.mUsername) == 0 || len(b.mPassword) == 0 {
-		return errors.New("username or password can not be empty")
-	}
-
-	return nil
 }
 
 func (b *BasicAuth) Name() string {
@@ -50,11 +36,25 @@ func (b *BasicAuth) ContractId() string {
 	return ContractId
 }
 
+func (b *BasicAuth) GetConfigMap() model.ConfigMap {
+	return b.mCM
+}
+
+func (b *BasicAuth) SetConfigMap(cm model.ConfigMap) error {
+	b.mCM = cm
+	b.mUsername = cm.String("username", "")
+	b.mPassword = cm.String("password", "")
+	if len(b.mUsername) == 0 || len(b.mPassword) == 0 {
+		return errors.New("username or password can not be empty")
+	}
+	return nil
+}
+
 func (b *BasicAuth) New() iface.ICapability {
 	return &BasicAuth{}
 }
 
-func (b *BasicAuth) IsAuthorized(expression string, metadata *model.Metadata) bool {
+func (b *BasicAuth) IsAuthorized(_ string, metadata *model.Metadata) bool {
 	var authorization, found = getHeaderValueSafe(metadata, "Authorization")
 	if !found {
 		return false
@@ -66,12 +66,15 @@ func (b *BasicAuth) IsAuthorized(expression string, metadata *model.Metadata) bo
 	if !ok || !equal(b.mUsername, username) || !equal(b.mPassword, password) {
 		return false
 	}
-
+	logger.L(b.ContractId()).Debug("basic auth passed")
 	return true
 }
 
+func init() {
+	registry.GlobalRegistry().AddCapability(&BasicAuth{})
+}
+
 // parseBasicAuth parses an HTTP Basic Authentication string.
-// "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==" returns ("Aladdin", "open sesame", true).
 func parseBasicAuth(auth string) (username, password string, ok bool) {
 	const prefix = "Basic "
 	// Case-insensitive prefix match. See Issue 22736.
